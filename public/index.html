@@ -1,417 +1,471 @@
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Дворовый футбол - Онлайн</title>
     <style>
-      body {
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background: linear-gradient(to bottom, #4caf50, #2e7d32);
-        font-family: "Arial", sans-serif;
-        overflow: hidden;
-      }
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 500px;
+            background: #4CAF50;
+            border: 5px solid #1B5E20;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+        
+        #field {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-image: url('YOUR_IMAGE_URL_HERE'); /* ЗАМЕНИТЕ ЭТУ ССЫЛКУ НА ВАШЕ ФОТО */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        /* Полупрозрачный оверлей для лучшей видимости игроков */
+        #field::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+        
+        #center-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background: white;
+            z-index: 2;
+        }
+        
+        #center-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            border: 2px solid white;
+            border-radius: 50%;
+            z-index: 2;
+        }
+        
+        .goal {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 100px;
+            background: #1B5E20;
+            border: 2px solid white;
+            z-index: 2;
+        }
+        
+        #goal-left {
+            left: 0;
+        }
+        
+        #goal-right {
+            right: 0;
+        }
+        
+        .player {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            transition: all 0.1s;
+            z-index: 3;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        #player1 {
+            background: #2196F3;
+            left: 100px;
+            top: 250px;
+        }
+        
+        #player2 {
+            background: #F44336;
+            right: 100px;
+            top: 250px;
+        }
+        
+        #ball {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            left: 390px;
+            top: 240px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+            transition: all 0.1s;
+            z-index: 3;
+            border: 1px solid #ccc;
+        }
+        
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            z-index: 4;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+        
+        #connection-status {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 14px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            z-index: 4;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        #player-role {
+            position: absolute;
+            top: 30px;
+            left: 10px;
+            color: white;
+            font-size: 14px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            z-index: 4;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        #instructions {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            text-align: center;
+            font-size: 14px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            z-index: 4;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 15px;
+            border-radius: 10px;
+        }
+        
+        #waiting-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            z-index: 5;
+            text-align: center;
+        }
+        
+        #game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 36px;
+            display: none;
+            z-index: 5;
+            text-align: center;
+        }
+        
+        #restart {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: #4CAF50;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        #restart:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
 
-      #game-container {
-        position: relative;
-        width: 800px;
-        height: 500px;
-        background: #4caf50;
-        border: 5px solid #1b5e20;
-        border-radius: 10px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-        overflow: hidden;
-      }
+        #game-container:focus {
+            outline: none;
+        }
 
-      #field {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        background: #4caf50;
-      }
+        .goal-text {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 12px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            z-index: 2;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
 
-      #center-line {
-        position: absolute;
-        top: 0;
-        left: 50%;
-        width: 2px;
-        height: 100%;
-        background: white;
-      }
+        #goal-text-left {
+            left: 25px;
+        }
 
-      #center-circle {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 100px;
-        height: 100px;
-        border: 2px solid white;
-        border-radius: 50%;
-      }
-
-      .goal {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 20px;
-        height: 100px;
-        background: #1b5e20;
-        border: 2px solid white;
-      }
-
-      #goal-left {
-        left: 0;
-      }
-
-      #goal-right {
-        right: 0;
-      }
-
-      .player {
-        position: absolute;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        transition: all 0.1s;
-      }
-
-      #player1 {
-        background: #2196f3;
-        left: 100px;
-        top: 250px;
-      }
-
-      #player2 {
-        background: #f44336;
-        right: 100px;
-        top: 250px;
-      }
-
-      #ball {
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        background: white;
-        border-radius: 50%;
-        left: 390px;
-        top: 240px;
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-        transition: all 0.1s;
-      }
-
-      #score {
-        position: absolute;
-        top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        color: white;
-        font-size: 24px;
-        font-weight: bold;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-      }
-
-      #connection-status {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        color: white;
-        font-size: 14px;
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-      }
-
-      #player-role {
-        position: absolute;
-        top: 30px;
-        left: 10px;
-        color: white;
-        font-size: 14px;
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-      }
-
-      #instructions {
-        position: absolute;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        color: white;
-        text-align: center;
-        font-size: 14px;
-        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-      }
-
-      #waiting-screen {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: white;
-        font-size: 24px;
-      }
-
-      #game-over {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: white;
-        font-size: 36px;
-        display: none;
-      }
-
-      #restart {
-        margin-top: 20px;
-        padding: 10px 20px;
-        background: #4caf50;
-        border: none;
-        border-radius: 5px;
-        color: white;
-        font-size: 18px;
-        cursor: pointer;
-      }
-
-      #restart:hover {
-        background: #45a049;
-      }
-
-      #game-container:focus {
-        outline: none;
-      }
+        #goal-text-right {
+            right: 25px;
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <div id="game-container" tabindex="0">
-      <div id="field">
-        <div id="center-line"></div>
-        <div id="center-circle"></div>
-        <div id="goal-left" class="goal"></div>
-        <div id="goal-right" class="goal"></div>
-        <div id="player1" class="player"></div>
-        <div id="player2" class="player"></div>
-        <div id="ball"></div>
-        <div id="score">0 : 0</div>
-        <div id="connection-status">Подключение...</div>
-        <div id="player-role"></div>
-        <div id="instructions">Управление: WASD или стрелки | Пробел: удар</div>
-      </div>
-
-      <div id="waiting-screen">
-        <div>Ожидание второго игрока...</div>
-        <div style="font-size: 16px; margin-top: 10px">
-          Отправьте эту ссылку другу
+        <div id="field">
+            <div id="center-line"></div>
+            <div id="center-circle"></div>
+            <div id="goal-left" class="goal"></div>
+            <div id="goal-right" class="goal"></div>
+            <div id="goal-text-left" class="goal-text">ВОРОТА</div>
+            <div id="goal-text-right" class="goal-text">ВОРОТА</div>
+            <div id="player1" class="player"></div>
+            <div id="player2" class="player"></div>
+            <div id="ball"></div>
+            <div id="score">0 : 0</div>
+            <div id="connection-status">Подключение...</div>
+            <div id="player-role"></div>
+            <div id="instructions">
+                Управление: WASD или стрелки | Пробел: удар
+            </div>
         </div>
-      </div>
-
-      <div id="game-over">
-        <div id="winner-text">Победа!</div>
-        <button id="restart">Играть снова</button>
-      </div>
+        
+        <div id="waiting-screen">
+            <div style="font-size: 32px; margin-bottom: 20px;">⚽ ДВОРОВЫЙ ФУТБОЛ ⚽</div>
+            <div>Ожидание второго игрока...</div>
+            <div style="font-size: 16px; margin-top: 20px;">Отправьте эту ссылку другу</div>
+            <div style="font-size: 14px; margin-top: 30px; color: #ccc;">Первый до 5 голов побеждает!</div>
+        </div>
+        
+        <div id="game-over">
+            <div id="winner-text" style="font-size: 42px; margin-bottom: 10px;">ПОБЕДА!</div>
+            <div id="final-score" style="font-size: 24px; margin-bottom: 30px;"></div>
+            <button id="restart">Играть снова</button>
+        </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      const socket = io();
-      const player1 = document.getElementById("player1");
-      const player2 = document.getElementById("player2");
-      const ball = document.getElementById("ball");
-      const scoreDisplay = document.getElementById("score");
-      const connectionStatus = document.getElementById("connection-status");
-      const playerRoleDisplay = document.getElementById("player-role");
-      const waitingScreen = document.getElementById("waiting-screen");
-      const gameOverScreen = document.getElementById("game-over");
-      const winnerText = document.getElementById("winner-text");
-      const restartButton = document.getElementById("restart");
+        const socket = io();
+        const player1 = document.getElementById('player1');
+        const player2 = document.getElementById('player2');
+        const ball = document.getElementById('ball');
+        const scoreDisplay = document.getElementById('score');
+        const connectionStatus = document.getElementById('connection-status');
+        const playerRoleDisplay = document.getElementById('player-role');
+        const waitingScreen = document.getElementById('waiting-screen');
+        const gameOverScreen = document.getElementById('game-over');
+        const winnerText = document.getElementById('winner-text');
+        const finalScore = document.getElementById('final-score');
+        const restartButton = document.getElementById('restart');
 
-      let playerRole = null;
-      let gameActive = false;
-      const keys = {
-        w: false,
-        a: false,
-        s: false,
-        d: false,
-        up: false,
-        left: false,
-        down: false,
-        right: false,
-        space: false,
-      };
+        let playerRole = null;
+        let gameActive = false;
+        const keys = {
+            w: false, a: false, s: false, d: false,
+            up: false, left: false, down: false, right: false,
+            space: false
+        };
 
-      const playerSpeed = 3;
-      const fieldWidth = 800;
-      const fieldHeight = 500;
+        // УВЕЛИЧЕННЫЕ СКОРОСТИ
+        const playerSpeed = 5; // Было 3
+        const fieldWidth = 800;
+        const fieldHeight = 500;
 
-      // Обработчики клавиатуры
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "w" || e.key === "ц") keys.w = true;
-        if (e.key === "a" || e.key === "ф") keys.a = true;
-        if (e.key === "s" || e.key === "ы") keys.s = true;
-        if (e.key === "d" || e.key === "в") keys.d = true;
-        if (e.key === "ArrowUp") keys.up = true;
-        if (e.key === "ArrowLeft") keys.left = true;
-        if (e.key === "ArrowDown") keys.down = true;
-        if (e.key === "ArrowRight") keys.right = true;
-        if (e.key === " ") {
-          e.preventDefault();
-          keys.space = true;
-          socket.emit("kickBall");
-        }
-      });
-
-      document.addEventListener("keyup", (e) => {
-        if (e.key === "w" || e.key === "ц") keys.w = false;
-        if (e.key === "a" || e.key === "ф") keys.a = false;
-        if (e.key === "s" || e.key === "ы") keys.s = false;
-        if (e.key === "d" || e.key === "в") keys.d = false;
-        if (e.key === "ArrowUp") keys.up = false;
-        if (e.key === "ArrowLeft") keys.left = false;
-        if (e.key === "ArrowDown") keys.down = false;
-        if (e.key === "ArrowRight") keys.right = false;
-        if (e.key === " ") keys.space = false;
-      });
-
-      // Обработка движения игрока
-      function updatePlayerPosition() {
-        if (!playerRole || !gameActive) return;
-
-        let x, y;
-
-        if (playerRole === "player1") {
-          x = parseInt(player1.style.left) || 100;
-          y = parseInt(player1.style.top) || 250;
-
-          if (keys.w && y > 30) y -= playerSpeed;
-          if (keys.s && y < fieldHeight - 30) y += playerSpeed;
-          if (keys.a && x > 30) x -= playerSpeed;
-          if (keys.d && x < fieldWidth / 2 - 30) x += playerSpeed;
-
-          player1.style.left = x + "px";
-          player1.style.top = y + "px";
-
-          // Отправляем новую позицию на сервер
-          socket.emit("playerMove", { x, y });
-        } else if (playerRole === "player2") {
-          x = parseInt(player2.style.left) || 700;
-          y = parseInt(player2.style.top) || 250;
-
-          if (keys.up && y > 30) y -= playerSpeed;
-          if (keys.down && y < fieldHeight - 30) y += playerSpeed;
-          if (keys.left && x > fieldWidth / 2 + 30) x -= playerSpeed;
-          if (keys.right && x < fieldWidth - 30) x += playerSpeed;
-
-          player2.style.left = x + "px";
-          player2.style.top = y + "px";
-
-          // Отправляем новую позицию на сервер
-          socket.emit("playerMove", { x, y });
-        }
-      }
-
-      // Игровой цикл
-      function gameLoop() {
-        updatePlayerPosition();
-        requestAnimationFrame(gameLoop);
-      }
-
-      // Сокет события
-      socket.on("connect", () => {
-        connectionStatus.textContent = "Подключено";
-        connectionStatus.style.color = "#4CAF50";
-        document.getElementById("game-container").focus();
-      });
-
-      socket.on("disconnect", () => {
-        connectionStatus.textContent = "Отключено";
-        connectionStatus.style.color = "#F44336";
-        gameActive = false;
-        waitingScreen.style.display = "flex";
-      });
-
-      socket.on("roleAssigned", (role) => {
-        playerRole = role;
-        playerRoleDisplay.textContent = `Вы: ${
-          role === "player1"
-            ? "Игрок 1 (синий) - WASD"
-            : role === "player2"
-            ? "Игрок 2 (красный) - Стрелки"
-            : "Наблюдатель"
-        }`;
-
-        if (role === "player1" || role === "player2") {
-          gameActive = true;
-          waitingScreen.style.display = "none";
-          // Устанавливаем начальные позиции
-          if (role === "player1") {
-            player1.style.left = "100px";
-            player1.style.top = "250px";
-          } else {
-            player2.style.left = "700px";
-            player2.style.top = "250px";
-          }
-        }
-        document.getElementById("game-container").focus();
-      });
-
-      socket.on("gameState", (state) => {
-        // Обновление позиций игроков
-        if (state.players.player1) {
-          player1.style.left = state.players.player1.x + "px";
-          player1.style.top = state.players.player1.y + "px";
-        }
-        if (state.players.player2) {
-          player2.style.left = state.players.player2.x + "px";
-          player2.style.top = state.players.player2.y + "px";
-        }
-
-        // Обновление мяча
-        ball.style.left = state.ball.x + "px";
-        ball.style.top = state.ball.y + "px";
-
-        // Обновление счета
-        scoreDisplay.textContent = `${state.score.player1} : ${state.score.player2}`;
-
-        // Проверка окончания игры
-        if (state.score.player1 >= 5 || state.score.player2 >= 5) {
-          gameActive = false;
-          gameOverScreen.style.display = "flex";
-          if (state.score.player1 > state.score.player2) {
-            winnerText.textContent = "Игрок 1 победил!";
-          } else {
-            winnerText.textContent = "Игрок 2 победил!";
-          }
-        }
-      });
-
-      // Перезапуск игры
-      restartButton.addEventListener("click", () => {
-        location.reload();
-      });
-
-      // Фокус на игре при клике
-      document
-        .getElementById("game-container")
-        .addEventListener("click", () => {
-          document.getElementById("game-container").focus();
+        // Обработчики клавиатуры
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'w' || e.key === 'ц') keys.w = true;
+            if (e.key === 'a' || e.key === 'ф') keys.a = true;
+            if (e.key === 's' || e.key === 'ы') keys.s = true;
+            if (e.key === 'd' || e.key === 'в') keys.d = true;
+            if (e.key === 'ArrowUp') keys.up = true;
+            if (e.key === 'ArrowLeft') keys.left = true;
+            if (e.key === 'ArrowDown') keys.down = true;
+            if (e.key === 'ArrowRight') keys.right = true;
+            if (e.key === ' ') {
+                e.preventDefault();
+                keys.space = true;
+                socket.emit('kickBall');
+            }
         });
 
-      // Запуск игрового цикла
-      gameLoop();
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'w' || e.key === 'ц') keys.w = false;
+            if (e.key === 'a' || e.key === 'ф') keys.a = false;
+            if (e.key === 's' || e.key === 'ы') keys.s = false;
+            if (e.key === 'd' || e.key === 'в') keys.d = false;
+            if (e.key === 'ArrowUp') keys.up = false;
+            if (e.key === 'ArrowLeft') keys.left = false;
+            if (e.key === 'ArrowDown') keys.down = false;
+            if (e.key === 'ArrowRight') keys.right = false;
+            if (e.key === ' ') keys.space = false;
+        });
+
+        // Обработка движения игрока
+        function updatePlayerPosition() {
+            if (!playerRole || !gameActive) return;
+
+            let x, y;
+            
+            if (playerRole === 'player1') {
+                x = parseInt(player1.style.left) || 100;
+                y = parseInt(player1.style.top) || 250;
+                
+                if (keys.w && y > 30) y -= playerSpeed;
+                if (keys.s && y < fieldHeight - 30) y += playerSpeed;
+                if (keys.a && x > 30) x -= playerSpeed;
+                if (keys.d && x < fieldWidth / 2 - 30) x += playerSpeed;
+                
+                player1.style.left = x + 'px';
+                player1.style.top = y + 'px';
+
+                socket.emit('playerMove', { x, y });
+                
+            } else if (playerRole === 'player2') {
+                x = parseInt(player2.style.left) || 700;
+                y = parseInt(player2.style.top) || 250;
+                
+                if (keys.up && y > 30) y -= playerSpeed;
+                if (keys.down && y < fieldHeight - 30) y += playerSpeed;
+                if (keys.left && x > fieldWidth / 2 + 30) x -= playerSpeed;
+                if (keys.right && x < fieldWidth - 30) x += playerSpeed;
+                
+                player2.style.left = x + 'px';
+                player2.style.top = y + 'px';
+
+                socket.emit('playerMove', { x, y });
+            }
+        }
+
+        // Игровой цикл
+        function gameLoop() {
+            updatePlayerPosition();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Сокет события
+        socket.on('connect', () => {
+            connectionStatus.textContent = 'Подключено';
+            connectionStatus.style.color = '#4CAF50';
+            document.getElementById('game-container').focus();
+        });
+
+        socket.on('disconnect', () => {
+            connectionStatus.textContent = 'Отключено';
+            connectionStatus.style.color = '#F44336';
+            gameActive = false;
+            waitingScreen.style.display = 'flex';
+        });
+
+        socket.on('roleAssigned', (role) => {
+            playerRole = role;
+            playerRoleDisplay.textContent = `Вы: ${role === 'player1' ? 'Игрок 1 (синий) - WASD' : 
+                                           role === 'player2' ? 'Игрок 2 (красный) - Стрелки' : 'Наблюдатель'}`;
+            
+            if (role === 'player1' || role === 'player2') {
+                gameActive = true;
+                waitingScreen.style.display = 'none';
+                if (role === 'player1') {
+                    player1.style.left = '100px';
+                    player1.style.top = '250px';
+                } else {
+                    player2.style.left = '700px';
+                    player2.style.top = '250px';
+                }
+            }
+            document.getElementById('game-container').focus();
+        });
+
+        socket.on('gameState', (state) => {
+            if (state.players.player1) {
+                player1.style.left = state.players.player1.x + 'px';
+                player1.style.top = state.players.player1.y + 'px';
+            }
+            if (state.players.player2) {
+                player2.style.left = state.players.player2.x + 'px';
+                player2.style.top = state.players.player2.y + 'px';
+            }
+
+            ball.style.left = state.ball.x + 'px';
+            ball.style.top = state.ball.y + 'px';
+
+            scoreDisplay.textContent = `${state.score.player1} : ${state.score.player2}`;
+
+            if (state.score.player1 >= 5 || state.score.player2 >= 5) {
+                gameActive = false;
+                gameOverScreen.style.display = 'flex';
+                finalScore.textContent = `Счет: ${state.score.player1} - ${state.score.player2}`;
+                if (state.score.player1 > state.score.player2) {
+                    winnerText.textContent = 'ИГРОК 1 ПОБЕДИЛ!';
+                    winnerText.style.color = '#2196F3';
+                } else {
+                    winnerText.textContent = 'ИГРОК 2 ПОБЕДИЛ!';
+                    winnerText.style.color = '#F44336';
+                }
+            }
+        });
+
+        restartButton.addEventListener('click', () => {
+            location.reload();
+        });
+
+        document.getElementById('game-container').addEventListener('click', () => {
+            document.getElementById('game-container').focus();
+        });
+
+        gameLoop();
     </script>
-  </body>
+</body>
 </html>
